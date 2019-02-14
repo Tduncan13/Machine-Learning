@@ -1,25 +1,42 @@
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
+from keras.utils import to_categorical
 
+#==========================================================
+#  Written by Tyler Duncan
+#  Date 02/13/2019
+#
+#  The purpose of this program is to create a Neural 
+#  Network that can classify images of handwritten 
+#  digits using only numpy.  This is part 1 of a 5 
+#  part problem set in Dr. Pawel Wocjan's Machine 
+#  Learning course at the University of Central Florida
+#==========================================================
+
+
+
+# Retrieve data set. 
 mnist = tf.keras.datasets.mnist 
 
-(x_train, y_train), (x_test, y_test) = mnist.load_data()
+# Unpack dataset. 
+(train_images_original, train_labels_original), (test_images_original, test_labels_original) = mnist.load_data()
+count, rows, cols = train_images_original.shape
 
-x_train = tf.keras.utils.normalize(x_train, axis=1)
-x_test = tf.keras.utils.normalize(x_test, axis=1)
+dim = rows * cols
 
-model = tf.keras.models.Sequential()
-model.add(tf.keras.layers.Flatten())
-model.add(tf.keras.layers.Dense(128, activation=tf.nn.relu))
-model.add(tf.keras.layers.Dense(128, activation=tf.nn.relu))
-model.add(tf.keras.layers.Dense(10, activation=tf.nn.softmax))
+# Reshape into input vectors. 
+train_images = train_images_original.reshape(count, dim)
+train_images = train_images.astype('float32') / 255 
+test_images = test_images_original.reshape(10000, dim)
+test_images = test_images.astype('float32') / 255
 
-model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-model.fit(x_train, y_train, epochs=3)
+# Convert Labels in to One-Hot Vectors
+train_labels = to_categorical(train_labels_original)
+test_labels = to_categorical(test_labels_original)
 
-val_loss, val_acc = model.evaluate(x_test, y_test)
-print(val_loss, val_acc)
+# Initialize Weight vector
+np.random.seed(42)
+initial_weight = np.random.randn(dim, 1)
 
-plt.imshow(x_train[0], cmap = plt.cm.binary)
-plt.show()
+
