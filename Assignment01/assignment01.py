@@ -42,8 +42,6 @@ test_labels = to_categorical(test_labels_original)
 
 # Define Classifier. 
 class Classifier: 
-    prediction = 0
-    
     # Construct the Classifier with Dataset. 
     def __init__(self, tri, trl, tsti, tstl, number):
         self.tri = tri
@@ -91,15 +89,8 @@ class Classifier:
         return a - y
 
     def train_model_bce(self):
-        
-        # Set trained flag
-        trained = False
         learning_rate = 0.5
         # Train the network. 
-
-        
-    
-        # Run through all training examples. 
         for i in range(0, count):
             # Only train on the numbers specific to this classifiers specialty. 
             x = self.tri[i]
@@ -112,10 +103,7 @@ class Classifier:
             self.weights = np.add(self.weights, gradient_w)
             self.bias += gradient_b
             # bias = self.bce_prime_bias(y, a)
-            
-            # print(loss)
 
-    print("Model Trained!")
     def make_prediction(self, ti):
         x = ti
         z = np.dot(self.weights.T, x) + self.bias
@@ -148,17 +136,17 @@ model_nine.train_model_bce()
 prediciton_vector = []
 q = 5100
 # Test Models. 
-# for q in range(0, count):
-prediciton_vector.append(model_zero.make_prediction(test_images[q]))
-prediciton_vector.append(model_one.make_prediction(test_images[q]))
-prediciton_vector.append(model_two.make_prediction(test_images[q]))
-prediciton_vector.append(model_three.make_prediction(test_images[q]))
-prediciton_vector.append(model_four.make_prediction(test_images[q]))
-prediciton_vector.append(model_five.make_prediction(test_images[q]))
-prediciton_vector.append(model_six.make_prediction(test_images[q]))
-prediciton_vector.append(model_seven.make_prediction(test_images[q]))
-prediciton_vector.append(model_eight.make_prediction(test_images[q]))
-prediciton_vector.append(model_nine.make_prediction(test_images[q]))
+for q in range(0, count):
+    prediciton_vector.append(model_zero.make_prediction(test_images[q]))
+    prediciton_vector.append(model_one.make_prediction(test_images[q]))
+    prediciton_vector.append(model_two.make_prediction(test_images[q]))
+    prediciton_vector.append(model_three.make_prediction(test_images[q]))
+    prediciton_vector.append(model_four.make_prediction(test_images[q]))
+    prediciton_vector.append(model_five.make_prediction(test_images[q]))
+    prediciton_vector.append(model_six.make_prediction(test_images[q]))
+    prediciton_vector.append(model_seven.make_prediction(test_images[q]))
+    prediciton_vector.append(model_eight.make_prediction(test_images[q]))
+    prediciton_vector.append(model_nine.make_prediction(test_images[q]))
 
 test = np.asarray(prediciton_vector)
 print(np.argmax(test))
