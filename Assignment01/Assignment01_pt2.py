@@ -126,10 +126,10 @@ model_seven.train_model_bce()
 model_eight.train_model_bce()
 model_nine.train_model_bce()
 
-prediciton_vector = []
-q = 5100
+
 # Test Models. 
-for q in range(0, count):
+for q in range(0, 10000):
+    prediciton_vector = []
     prediciton_vector.append(model_zero.make_prediction(test_images[q]))
     prediciton_vector.append(model_one.make_prediction(test_images[q]))
     prediciton_vector.append(model_two.make_prediction(test_images[q]))

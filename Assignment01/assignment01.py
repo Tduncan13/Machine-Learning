@@ -4,7 +4,7 @@ import math
 import matplotlib.pyplot as plt
 from keras.utils import to_categorical
 import random
-from numba import vectorize, float64
+import numba 
 
 #==========================================================
 #  Written by Tyler Duncan
@@ -69,27 +69,22 @@ class Classifier:
         return 1 / (1 + np.exp(-z))
 
     # Define sigmoid prime. 
-    @vectorize([float64(float64, float64)], target='cuda')
     def sigmoid_prime(self, z):
         return self.sigmoid(z) * (1 - self.sigmoid(z))
 
     # Define Squared Error Loss
-    @vectorize([float64(float64, float64, float64)], target='cuda')
     def se(self, y, a):
         return 0.5 * ((a - y) ** 2)
 
     # Define Squared Error Loss Prime
-    @vectorize([float64(float64, float64, float64)], target='cuda')
     def se_prime(self, a, y):
         return a - y
 
     # Define Binary Cross Entropy Loss.
-    @vectorize([float64(float64, float64, float64)], target='cuda')
     def bce(self, y, a):
         return (-y * np.log10(a)) - ((1 - y) * np.log10(1 - a))
 
     # Everything simplifies to (a - y)x_j for Binary Cross Entropy's derivative. 
-    @vectorize([float64(float64, float64, float64, float64)], target='cuda')
     def bce_prime(self, y, a, x):
         return x * np.subtract(a, y)
 
