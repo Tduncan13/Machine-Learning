@@ -4,7 +4,9 @@ import math
 import matplotlib.pyplot as plt
 from keras.utils import to_categorical
 import random
+import sys
 
+# sys.setrecursionlimit(1500)
 # Create visited array for DFS
 visited = [0] * 784
 
@@ -30,14 +32,19 @@ x_test_bw = x_test_original
 x_train_bw[x_train_bw > 0] = 1
 x_test_bw[x_test_bw > 0] = 1
 
+# Get root of each set. This will act as path compression. 
 def find_parent(v):
-    n = 
-    while 
+    n = v
+    while n != parents[n]:
+        n = parents[n]
+
+    return n 
 
 # Use DFS to search through all connected pixels and updating a 
 # Set list using path compression. 
 def dfs(x, i, j):
     
+
     # Create search arrays. 
     dx = [0, 1, 0, -1]
     dy = [1, 0, -1, 0]
@@ -45,20 +52,28 @@ def dfs(x, i, j):
     global visited
     global parents
 
+
     # Mark this pixel visited. 
     visited[i * rows + j] = 1
-
+    if x[i][j] == 1:
+        parents[(i * rows) + j] = -1
+        return
+    # print(visited)
     for n in range(4):
         # If a black pixel is found, mark that as negative on in the parents array. 
-        if x[i + dx[n]][j + dy[n]] == 1:
-            parents[(i + dx[n]) * rows + (j + dy[n])] = -1
+        if i + dy[n] > 0 and j + dx[n] > 0:
+            if i + dy[n] < rows and j + dx[n] < cols:
+                if x[i + dy[n]][j + dx[n]] == 1:
+                    parents[(i * rows) + j + (rows * dy[n]) + dx[n]] = -1
 
         # Check pixels below, to the right, above and left of current position. 
         # If pixel of value 0 is found and has not been visited, mark that pixel as having 
         # current pixel as its parent and move to that pixel using recursion.  
-        if x[i + dx[n]][j + dy[n]] == 0 and visited[(i + dx[n]) * rows + (j + dy[n]) != 1]:
-            parents[(i + dx[n]) * rows + (j + dy[n])] = i * rows + j
-            dfs(x, i + dx[n], j + dy[n])
+        if i + dy[n] > 0 and j + dx[n] > 0:
+            if i + dy[n] < rows and j + dx[n] < cols:
+                if x[i + dy[n]][j + dx[n]] == 0 and visited[(i * rows) + j + (rows * dy[n]) + dx[n]] == 0:
+                    parents[(i * rows) + j + (rows * dy[n]) + dx[n]] = find_parent(i * rows + j)
+                    dfs(x, i + dy[n], j + dx[n])
 
 
 def disjoint_sets(x):
@@ -73,10 +88,17 @@ def disjoint_sets(x):
     global visited
     global parents
 
+    regions = []
+
     for i in range(28):
         for j in range(28):
-            if visited[(i * rows) + cols] != 0:
+            if visited[(i * rows) + j] == 0:
                 dfs(x, i, j)
+
+    print(np.unique(parents))
+    # for i in range(784):
+    #     if parents[i] != -1:
+            
 
 
 # model = tf.keras.models.Sequential()
@@ -92,3 +114,10 @@ def disjoint_sets(x):
 
 # test_loss, test_acc = model.evaluate(x_test, y_test)
 # print(test_loss, test_acc)
+
+test_labels = to_categorical(y_test)
+q = 0
+print(np.argmax(test_labels[q]))
+disjoint_sets(x_test_bw[q])
+plt.imshow(x_test_bw[q])
+plt.show()
