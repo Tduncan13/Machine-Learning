@@ -31,32 +31,44 @@ x_test_bw = x_test_original
 x_train_bw[x_train_bw > 0] = 1
 x_test_bw[x_test_bw > 0] = 1
 
+def add_features(train, test):
+    for q in range(count):
+        # print(np.argmax(test_labels[q]))
+        np.append(train[q], disjoint_sets(x_train_bw[q]))
+        # plt.imshow(x_test_bw[q])
+        # plt.show()
+
+    for q in range(10000):
+        np.append(test[q], disjoint_sets(x_test_bw[q]))
+
 # Get root of each set. This will act as path compression. 
 def find_parent(v):
     n = v
     while n != parents[n]:
         n = parents[n]
-
     return n 
 
 # Use DFS to search through all connected pixels and updating a 
-# Set list using path compression. 
+# set list using path compression. 
 def dfs(x, i, j):
     
     global visited
     global parents
     
-    # Create search arrays. 
+    # Create search arrays to check adjacent pixels. 
     dx = [0, 1, 0, -1]
     dy = [1, 0, -1, 0]
 
     # Mark this pixel visited. 
     current_pixel = (i * rows) + j
     visited[current_pixel] = 1
+
+    # If we are on a black pixel mark it as visited and move on. 
     if x[i][j] == 1:
         parents[current_pixel] = -1
         return
-    # print(visited)
+
+    # Check adjacent pixels using dx, dy arrays. 
     for n in range(4):
         new_x = j + dx[n]
         new_y = i + dy[n]
@@ -79,16 +91,14 @@ def dfs(x, i, j):
 def disjoint_sets(x):
     #
     # Algorithm:  
-    # Start at (0, 0) and look down, right, up, left.
-    # First pixel found, place current pixel location as that pixels parent.
-    # Mark current pixel visited. 
-    # Move to new pixel. 
-    # Repeat until all nodes are visited 
+    #   - Start at (0, 0) and look down, right, up, left.
+    #   - The first pixel found, mark current pixel as that new pixels parent.
+    #   - Mark current pixel visited. 
+    #   - Move to new pixel. 
+    #   - Repeat until all nodes are visited 
     #
     global visited
     global parents
-
-    regions = []
 
     for i in range(28):
         for j in range(28):
@@ -96,29 +106,27 @@ def disjoint_sets(x):
             if visited[current_pixel] == 0:
                 dfs(x, i, j)
 
-    print(len(np.unique(parents)) - 1)
-    # for i in range(784):
-    #     if parents[i] != -1:
-            
+    # Return the number of white regions.  This should correspond to how many elements are 
+    # in the parents array minus 1. 
+    return len(np.unique(parents)) - 1 
 
 
-# model = tf.keras.models.Sequential()
-# model.add(tf.keras.layers.Flatten())
-# model.add(tf.keras.layers.Dense(128, activation=tf.nn.relu))
-# model.add(tf.keras.layers.Dense(128, activation=tf.nn.relu))
-# model.add(tf.keras.layers.Dense(10, activation=tf.nn.softmax))
+add_features(x_train_bw, x_test_bw)
+# Create Model
+model = tf.keras.models.Sequential()
+model.add(tf.keras.layers.Flatten())
+model.add(tf.keras.layers.Dense(128, activation=tf.nn.relu))
+model.add(tf.keras.layers.Dense(128, activation=tf.nn.relu))
+model.add(tf.keras.layers.Dense(10, activation=tf.nn.softmax))
 
-# sgd = tf.keras.optimizers.SGD(lr=0.01, momentum=0.0, decay=0.0, nesterov=False)
 
-# model.compile(optimizer=sgd, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-# model.fit(x_train, y_train, epochs=10, batch_size=32)
+sgd = tf.keras.optimizers.SGD(lr=0.01, momentum=0.0, decay=0.0, nesterov=False)
 
-# test_loss, test_acc = model.evaluate(x_test, y_test)
-# print(test_loss, test_acc)
+model.compile(optimizer=sgd, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+model.fit(x_train, y_train, epochs=10, batch_size=32)
 
-test_labels = to_categorical(y_test)
-q = 3
-print(np.argmax(test_labels[q]))
-disjoint_sets(x_test_bw[q])
-# plt.imshow(x_test_bw[q])
-# plt.show()
+test_loss, test_acc = model.evaluate(x_test, y_test)
+print(test_loss, test_acc)
+
+
+
