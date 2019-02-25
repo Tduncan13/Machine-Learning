@@ -10,7 +10,6 @@ import sys
 # Create visited array for DFS
 visited = [0] * 784
 
-
 # Create Parent array for Disjoint Set Alg
 parents = list(range(0, 784))
 
@@ -44,36 +43,37 @@ def find_parent(v):
 # Set list using path compression. 
 def dfs(x, i, j):
     
-
+    global visited
+    global parents
+    
     # Create search arrays. 
     dx = [0, 1, 0, -1]
     dy = [1, 0, -1, 0]
 
-    global visited
-    global parents
-
-
     # Mark this pixel visited. 
-    visited[i * rows + j] = 1
+    current_pixel = (i * rows) + j
+    visited[current_pixel] = 1
     if x[i][j] == 1:
-        parents[(i * rows) + j] = -1
+        parents[current_pixel] = -1
         return
     # print(visited)
     for n in range(4):
+        new_x = j + dx[n]
+        new_y = i + dy[n]
+        next_pixel = (i * rows) + j + (cols * dy[n]) + dx[n]
+
         # If a black pixel is found, mark that as negative on in the parents array. 
-        if i + dy[n] > 0 and j + dx[n] > 0:
-            if i + dy[n] < rows and j + dx[n] < cols:
-                if x[i + dy[n]][j + dx[n]] == 1:
-                    parents[(i * rows) + j + (rows * dy[n]) + dx[n]] = -1
+        if 0 <= new_y < rows and 0 <= new_x < cols:
+            if x[new_y][new_x] == 1:
+                parents[next_pixel] = -1
 
         # Check pixels below, to the right, above and left of current position. 
         # If pixel of value 0 is found and has not been visited, mark that pixel as having 
         # current pixel as its parent and move to that pixel using recursion.  
-        if i + dy[n] > 0 and j + dx[n] > 0:
-            if i + dy[n] < rows and j + dx[n] < cols:
-                if x[i + dy[n]][j + dx[n]] == 0 and visited[(i * rows) + j + (rows * dy[n]) + dx[n]] == 0:
-                    parents[(i * rows) + j + (rows * dy[n]) + dx[n]] = find_parent(i * rows + j)
-                    dfs(x, i + dy[n], j + dx[n])
+        if 0 <= new_y < rows and 0 <= new_x < cols:
+            if x[new_y][new_x] == 0 and visited[next_pixel] == 0:
+                parents[next_pixel] = find_parent(current_pixel)
+                dfs(x, new_y, new_x)
 
 
 def disjoint_sets(x):
@@ -92,10 +92,11 @@ def disjoint_sets(x):
 
     for i in range(28):
         for j in range(28):
-            if visited[(i * rows) + j] == 0:
+            current_pixel = (i * rows) + j
+            if visited[current_pixel] == 0:
                 dfs(x, i, j)
 
-    print(np.unique(parents))
+    print(len(np.unique(parents)) - 1)
     # for i in range(784):
     #     if parents[i] != -1:
             
@@ -116,8 +117,8 @@ def disjoint_sets(x):
 # print(test_loss, test_acc)
 
 test_labels = to_categorical(y_test)
-q = 0
+q = 3
 print(np.argmax(test_labels[q]))
 disjoint_sets(x_test_bw[q])
-plt.imshow(x_test_bw[q])
-plt.show()
+# plt.imshow(x_test_bw[q])
+# plt.show()
