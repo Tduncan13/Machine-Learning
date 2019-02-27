@@ -72,7 +72,7 @@ class Classifier:
 
     # Define Binary Cross Entropy Loss.
     def bce(self, y, a):
-        return (-y * np.log10(a)) - ((1 - y) * np.log10(1 - a))
+        return (-y * np.log(a)) - ((1 - y) * np.log(1 - a))
 
     # Everything simplifies to (a - y)x_j for Binary Cross Entropy's derivative. 
     def bce_prime(self, y, a, x):
