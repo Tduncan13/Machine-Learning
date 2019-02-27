@@ -10,9 +10,9 @@ mnist = tf.keras.datasets.mnist
 
 # Unpack dataset. 
 (train_images_original, train_labels_original), (test_images_original, test_labels_original) = mnist.load_data()
-
 count, rows, cols = train_images_original.shape
 
+# Set dimension constant. 
 dim = rows * cols
 
 # Reshape into input vectors. 
@@ -39,16 +39,20 @@ def softmax(z):
     z2 = np.exp(z - z1)
     return z2 / z2.sum()
 
+# Define Categorical Cross-Entropy
 def cce(y, z):
     return  -1 * np.sum(y.T.dot(z - np.log(np.exp(z).sum()))) 
 
+# Define CCE's derivative with respect to w. 
 def cce_prime_w(x, y, a):
-    dz = a - y.T # (10, 100) * (10, 100)
+    dz = a - y.T 
     return x.T.dot(dz.T)
 
+# Define CCE's derivative with respect to b. 
 def cce_prime_b(y, a):
     return np.sum(a - y.T)
 
+# Train the model using Mini-Batch Stochastic Gradient Descent. 
 def train_model_mini_batch(epochs, batch_size, learning_rate):
     global w
     global b
@@ -67,7 +71,6 @@ def train_model_mini_batch(epochs, batch_size, learning_rate):
             w = w - (dw * learning_rate) 
             b = b - (db * learning_rate) 
             
-
         print("Finished Epoch %d" % epoch)
 
 # Test the model. 
@@ -87,11 +90,8 @@ def test_model():
 
     print("Accuracy - %0.4f" % ((correct / 10000) * 100))
         
-
 # Train the model.
 train_model_mini_batch(20, 4, 0.01)
-
 print("Model Trained!")
-
 # Test the model. 
 test_model()
