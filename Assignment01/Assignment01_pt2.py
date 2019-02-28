@@ -84,13 +84,12 @@ class Classifier:
     def train_model_bce(self):
         learning_rate = 0.5
         # Train the network. 
-        for i in range(0, count):
+        for i in range(count):
             # Only train on the numbers specific to this classifiers specialty. 
             x = self.tri[i]
             z = np.dot(self.weights.T, x) + self.bias
             a = self.sigmoid(z)
-            y = int(np.argmax(self.trl[i]) == self.number)
-            loss = self.bce(y, a)   
+            y = int(np.argmax(self.trl[i]) == self.number) 
             gradient_w = np.multiply((learning_rate * -1), self.bce_prime(y, a, x))
             gradient_b = self.bce_prime_bias(y, a) * learning_rate * -1
             self.weights = np.add(self.weights, gradient_w)
@@ -126,9 +125,9 @@ model_seven.train_model_bce()
 model_eight.train_model_bce()
 model_nine.train_model_bce()
 
-
+correct = 0
 # Test Models. 
-for q in range(0, 10000):
+for q in range(10000):
     prediciton_vector = []
     prediciton_vector.append(model_zero.make_prediction(test_images[q]))
     prediciton_vector.append(model_one.make_prediction(test_images[q]))
@@ -140,7 +139,8 @@ for q in range(0, 10000):
     prediciton_vector.append(model_seven.make_prediction(test_images[q]))
     prediciton_vector.append(model_eight.make_prediction(test_images[q]))
     prediciton_vector.append(model_nine.make_prediction(test_images[q]))
+    test = np.asarray(prediciton_vector)
+    if np.argmax(test) == np.argmax(test_labels[q]):
+        correct += 1
 
-test = np.asarray(prediciton_vector)
-print(np.argmax(test))
-print(np.argmax(test_labels[q]))
+print("Accuracy - %0.4f" % ((correct * 100 ) / 10000))

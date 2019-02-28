@@ -91,7 +91,7 @@ def test_model():
     print("Accuracy - %0.4f" % ((correct / 10000) * 100))
         
 # Train the model.
-train_model_mini_batch(20, 4, 0.01)
+train_model_mini_batch(20, 32, 0.01)
 print("Model Trained!")
 # Test the model. 
 test_model()

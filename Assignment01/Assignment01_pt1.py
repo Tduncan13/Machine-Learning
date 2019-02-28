@@ -30,7 +30,7 @@ count, rows, cols = train_images_original.shape
 dim = rows * cols
 
 # Reshape into input vectors. 
-train_images = train_images_original.reshape(count, dim, 1)
+train_images = train_images_original.reshape(count, dim)
 train_images = train_images.astype('float32') / 255 
 test_images = test_images_original.reshape(10000, dim)
 test_images = test_images.astype('float32') / 255
@@ -63,42 +63,65 @@ class Classifier:
 
     # Define the sigmoid funciton. 
     def sigmoid(self, z):
-        return 1 / (1 + math.exp(-z))
-
-    # Define sigmoid prime. 
-    def sigmoid_prime(self, z):
-        return self.sigmoid(z) * (1 - self.sigmoid(z))
+        return 1 / (1 + np.exp(-z))
 
     # Define Squared Error Loss
     def se(self, y, a):
-        return 0.5 * ((a - y) ** 2)
+        return 0.5 * ((a - y.T) ** 2)
 
     # Define Squared Error Loss Prime
-    def se_prime(self, a, y):
-        return a - y
+    # x: (100, 784), dz: (100, 1), da: (100, 1), GOAL: (784, 1)
+    def se_prime_w(self, x, a, y, z):
+        dz = a - y 
+        da = (1 - a) * a
+        dw = np.multiply(dz, da) # (784, 10)
+        # print(z.shape) # (32, 1)
+        # print(a.shape) # (32, 1)
+        # print(y.shape) # (32, 1)
+        # print(x.shape) # (32, 784)
+        # print(dz.shape) # (32, 1)
+        # print(da.shape) # (32, 1)
+        # print(dw.shape) # (32, 1)
+        dw = x.T.dot(dw)
+        # print(dw.shape) # (784, 1)
+        return dw 
 
-    def bce_prime_bias(self, y, a):
-        return a - y
+    def se_prime_b(self, a, y, z):
+        db = (a - y.T) * (1 - a) * a
+        return np.sum(db)
 
-    def train_model_bce(self):
-        learning_rate = 0.5
-        # Train the network. 
-        for i in range(0, count):
-            # Only train on the numbers specific to this classifiers specialty. 
-            x = self.tri[i]
-            z = np.dot(self.weights.T, x) + self.bias
-            a = self.sigmoid(z)
-            y = int(np.argmax(self.trl[i]) == self.number)
-            loss = self.bce(y, a)   
-            gradient_w = np.multiply((learning_rate * -1), self.bce_prime(y, a, x))
-            gradient_b = self.bce_prime_bias(y, a) * learning_rate * -1
-            self.weights = np.add(self.weights, gradient_w)
-            self.bias += gradient_b
-            # bias = self.bce_prime_bias(y, a)
+    def train_model_se(self, epochs, learning_rate, batch_size):
+        
+        for epoch in range(epochs):
+            s = np.random.permutation(count)
+            x_shuffled = self.tri[s]
+            y_shuffled = self.trl[s]
+            for i in range(0, count, batch_size):
+                x = x_shuffled[i:i+batch_size]
+                y = y_shuffled[i:i+batch_size]
+                y = y[:,self.number].reshape(batch_size,1)
+                w = self.weights
+                b = self.bias
+                # print(w.shape)
+                z = (w.T.dot(x.T) + b).T
+                a = self.sigmoid(z) 
+                dw = self.se_prime_w(x, a, y, z) * (1 / batch_size)
+                db = self.se_prime_b(a, y, z) * (1 / batch_size)
+                # print(dw.shape)
+                self.weights = w - (dw * learning_rate)
+                self.bias = b - (db * learning_rate)
+                
+        print("Classifier %d trained." % self.number)
+           
 
     def make_prediction(self, ti):
+        w = self.weights
+        b = self.bias
         x = ti
-        z = np.dot(self.weights.T, x) + self.bias
+        z = (w.T.dot(x.T) + b).T
+        # print(w.shape)
+        # print(x.shape)
+        # print(z.shape)
         return self.sigmoid(z)
         
 # Create models.
@@ -114,20 +137,24 @@ model_eight = Classifier(train_images, train_labels, test_images, test_labels, 8
 model_nine = Classifier(train_images, train_labels, test_images, test_labels, 9)
 
 # Train Models
-model_zero.train_model_bce()
-model_one.train_model_bce()
-model_two.train_model_bce()
-model_three.train_model_bce()
-model_four.train_model_bce()
-model_five.train_model_bce()
-model_six.train_model_bce()
-model_seven.train_model_bce()
-model_eight.train_model_bce()
-model_nine.train_model_bce()
+epochs = 10
+learning_rate = 0.5
+batch_size = 32
 
+model_zero.train_model_se(epochs, learning_rate, batch_size)
+model_one.train_model_se(epochs, learning_rate, batch_size)
+model_two.train_model_se(epochs, learning_rate, batch_size)
+model_three.train_model_se(epochs, learning_rate, batch_size)
+model_four.train_model_se(epochs, learning_rate, batch_size)
+model_five.train_model_se(epochs, learning_rate, batch_size)
+model_six.train_model_se(epochs, learning_rate, batch_size)
+model_seven.train_model_se(epochs, learning_rate, batch_size)
+model_eight.train_model_se(epochs, learning_rate, batch_size)
+model_nine.train_model_se(epochs, learning_rate, batch_size)
 
+correct = 0
 # Test Models. 
-for q in range(0, 10000):
+for q in range(10000):
     prediciton_vector = []
     prediciton_vector.append(model_zero.make_prediction(test_images[q]))
     prediciton_vector.append(model_one.make_prediction(test_images[q]))
@@ -139,7 +166,10 @@ for q in range(0, 10000):
     prediciton_vector.append(model_seven.make_prediction(test_images[q]))
     prediciton_vector.append(model_eight.make_prediction(test_images[q]))
     prediciton_vector.append(model_nine.make_prediction(test_images[q]))
+    test = np.asarray(prediciton_vector)
+    # print(np.argmax(test))
+    # print(np.argmax(test_labels[q]))
+    if np.argmax(test) == np.argmax(test_labels[q]):
+        correct += 1
 
-test = np.asarray(prediciton_vector)
-print(np.argmax(test))
-print(np.argmax(test_labels[q]))
+print("Accuracy - %0.4f" % ((correct * 100 ) / 10000))

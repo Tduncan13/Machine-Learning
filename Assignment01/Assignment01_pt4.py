@@ -14,14 +14,14 @@ x_test = tf.keras.utils.normalize(x_test, axis=1)
 
 model = tf.keras.models.Sequential()
 model.add(tf.keras.layers.Flatten())
-model.add(tf.keras.layers.Dense(128, activation=tf.nn.relu))
-model.add(tf.keras.layers.Dense(128, activation=tf.nn.relu))
+# model.add(tf.keras.layers.Dense(128, activation=tf.nn.relu))
+# model.add(tf.keras.layers.Dense(128, activation=tf.nn.relu))
 model.add(tf.keras.layers.Dense(10, activation=tf.nn.softmax))
 
 sgd = tf.keras.optimizers.SGD(lr=0.01, momentum=0.0, decay=0.0, nesterov=False)
 
 model.compile(optimizer=sgd, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-model.fit(x_train, y_train, epochs=10, batch_size=32)
+model.fit(x_train, y_train, epochs=20, batch_size=32)
 
 test_loss, test_acc = model.evaluate(x_test, y_test)
 print(test_loss, test_acc)
