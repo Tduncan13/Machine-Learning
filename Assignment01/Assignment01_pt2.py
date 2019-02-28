@@ -5,21 +5,6 @@ import matplotlib.pyplot as plt
 from keras.utils import to_categorical
 import random
 
-#==========================================================
-#  Written by Tyler Duncan
-#  Date 02/13/2019
-#
-#  The purpose of this program is to create a Neural 
-#  Network that can classify images of handwritten 
-#  digits using only numpy.  This is part 2 of a 5 
-#  part problem set in Dr. Pawel Wocjan's Machine 
-#  Learning course at the University of Central Florida
-#==========================================================
-
-#==============================================================
-#  For problem 5 read up on Connected Components Alg using DFS
-#==============================================================
-
 # Retrieve data set. 
 mnist = tf.keras.datasets.mnist 
 
@@ -85,7 +70,6 @@ class Classifier:
         learning_rate = 0.5
         # Train the network. 
         for i in range(count):
-            # Only train on the numbers specific to this classifiers specialty. 
             x = self.tri[i]
             z = np.dot(self.weights.T, x) + self.bias
             a = self.sigmoid(z)
@@ -94,7 +78,6 @@ class Classifier:
             gradient_b = self.bce_prime_bias(y, a) * learning_rate * -1
             self.weights = np.add(self.weights, gradient_w)
             self.bias += gradient_b
-            # bias = self.bce_prime_bias(y, a)
 
     def make_prediction(self, ti):
         x = ti

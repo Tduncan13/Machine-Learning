@@ -6,7 +6,6 @@ from keras.utils import to_categorical
 import random
 import sys
 
-# sys.setrecursionlimit(1500)
 # Create visited array for DFS
 visited = [0] * 784
 
@@ -31,12 +30,10 @@ x_test_bw = x_test_original
 x_train_bw[x_train_bw > 0] = 1
 x_test_bw[x_test_bw > 0] = 1
 
+# Add new feature value to the end ot the input vector.
 def add_features(train, test):
     for q in range(count):
-        # print(np.argmax(test_labels[q]))
         np.append(train[q], disjoint_sets(x_train_bw[q]))
-        # plt.imshow(x_test_bw[q])
-        # plt.show()
 
     for q in range(10000):
         np.append(test[q], disjoint_sets(x_test_bw[q]))
@@ -123,7 +120,7 @@ model.add(tf.keras.layers.Dense(10, activation=tf.nn.softmax))
 sgd = tf.keras.optimizers.SGD(lr=0.01, momentum=0.0, decay=0.0, nesterov=False)
 
 model.compile(optimizer=sgd, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-model.fit(x_train, y_train, epochs=10, batch_size=32)
+model.fit(x_train, y_train, epochs=20, batch_size=32)
 
 test_loss, test_acc = model.evaluate(x_test, y_test)
 print(test_loss, test_acc)

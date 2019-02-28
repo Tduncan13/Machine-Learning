@@ -5,21 +5,6 @@ import matplotlib.pyplot as plt
 from keras.utils import to_categorical
 import random
 
-#==========================================================
-#  Written by Tyler Duncan
-#  Date 02/13/2019
-#
-#  The purpose of this program is to create a Neural 
-#  Network that can classify images of handwritten 
-#  digits using only numpy.  This is part 1 of a 5 
-#  part problem set in Dr. Pawel Wocjan's Machine 
-#  Learning course at the University of Central Florida
-#==========================================================
-
-#==============================================================
-#  For problem 5 read up on Connected Components Alg using DFS
-#==============================================================
-
 # Retrieve data set. 
 mnist = tf.keras.datasets.mnist 
 
@@ -70,20 +55,11 @@ class Classifier:
         return 0.5 * ((a - y.T) ** 2)
 
     # Define Squared Error Loss Prime
-    # x: (100, 784), dz: (100, 1), da: (100, 1), GOAL: (784, 1)
     def se_prime_w(self, x, a, y, z):
         dz = a - y 
         da = (1 - a) * a
-        dw = np.multiply(dz, da) # (784, 10)
-        # print(z.shape) # (32, 1)
-        # print(a.shape) # (32, 1)
-        # print(y.shape) # (32, 1)
-        # print(x.shape) # (32, 784)
-        # print(dz.shape) # (32, 1)
-        # print(da.shape) # (32, 1)
-        # print(dw.shape) # (32, 1)
+        dw = np.multiply(dz, da) 
         dw = x.T.dot(dw)
-        # print(dw.shape) # (784, 1)
         return dw 
 
     def se_prime_b(self, a, y, z):
@@ -102,26 +78,20 @@ class Classifier:
                 y = y[:,self.number].reshape(batch_size,1)
                 w = self.weights
                 b = self.bias
-                # print(w.shape)
                 z = (w.T.dot(x.T) + b).T
                 a = self.sigmoid(z) 
                 dw = self.se_prime_w(x, a, y, z) * (1 / batch_size)
                 db = self.se_prime_b(a, y, z) * (1 / batch_size)
-                # print(dw.shape)
                 self.weights = w - (dw * learning_rate)
                 self.bias = b - (db * learning_rate)
                 
         print("Classifier %d trained." % self.number)
            
-
     def make_prediction(self, ti):
         w = self.weights
         b = self.bias
         x = ti
         z = (w.T.dot(x.T) + b).T
-        # print(w.shape)
-        # print(x.shape)
-        # print(z.shape)
         return self.sigmoid(z)
         
 # Create models.
@@ -167,8 +137,6 @@ for q in range(10000):
     prediciton_vector.append(model_eight.make_prediction(test_images[q]))
     prediciton_vector.append(model_nine.make_prediction(test_images[q]))
     test = np.asarray(prediciton_vector)
-    # print(np.argmax(test))
-    # print(np.argmax(test_labels[q]))
     if np.argmax(test) == np.argmax(test_labels[q]):
         correct += 1
 
