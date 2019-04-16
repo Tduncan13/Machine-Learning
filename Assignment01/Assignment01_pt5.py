@@ -1,10 +1,12 @@
 import tensorflow as tf
 import numpy as np
-import math
 import matplotlib.pyplot as plt
 from keras.utils import to_categorical
-import random
-import sys
+from keras import layers
+from keras import models
+from keras import optimizers
+from keras.utils import normalize
+from keras.datasets import mnist
 
 # Create visited array for DFS
 visited = [0] * 784
@@ -13,14 +15,15 @@ visited = [0] * 784
 parents = list(range(0, 784))
 
 # Retrieve data set. 
-mnist = tf.keras.datasets.mnist 
 (x_train_original, y_train), (x_test_original, y_test) = mnist.load_data()
 
 count, rows, cols = x_train_original.shape
 
 # Normalize Data Set. 
-x_train = tf.keras.utils.normalize(x_train_original, axis=1)
-x_test = tf.keras.utils.normalize(x_test_original, axis=1)
+x_train = normalize(x_train_original, axis=1)
+x_test = normalize(x_test_original, axis=1)
+x_train = x_train.reshape(60000, rows * cols, 1)
+x_test = x_test.reshape(10000, rows * cols, 1)
 
 # Get data set for custom features 
 x_train_bw = x_train_original
@@ -32,11 +35,13 @@ x_test_bw[x_test_bw > 0] = 1
 
 # Add new feature value to the end ot the input vector.
 def add_features(train, test):
-    for q in range(count):
-        np.append(train[q], disjoint_sets(x_train_bw[q]))
+    global x_train_bw
+    global x_test_bw
+    for p in range(count):
+        train[p] = np.append(train[p], disjoint_sets(x_train_bw[p]))
 
     for q in range(10000):
-        np.append(test[q], disjoint_sets(x_test_bw[q]))
+        test[p] = np.append(test[q], disjoint_sets(x_test_bw[q]))
 
 # Get root of each set. This will act as path compression. 
 def find_parent(v):
@@ -108,22 +113,43 @@ def disjoint_sets(x):
     return len(np.unique(parents)) - 1 
 
 
-add_features(x_train_bw, x_test_bw)
+add_features(x_train, x_test)
 # Create Model
-model = tf.keras.models.Sequential()
-model.add(tf.keras.layers.Flatten())
-model.add(tf.keras.layers.Dense(128, activation=tf.nn.relu))
-model.add(tf.keras.layers.Dense(128, activation=tf.nn.relu))
-model.add(tf.keras.layers.Dense(10, activation=tf.nn.softmax))
+model = models.Sequential()
+model.add(layers.Dense(128, input_shape=(rows * cols + 1, 1), activation='relu'))
+model.add(layers.Dropout(rate=0.1))
+model.add(layers.Dense(256, activation='relu'))
+model.add(layers.Dense(10, activation='relu'))
+sgd = optimizers.SGD(lr=0.01)
+model.compile(optimizer=sgd, loss='categorical_crossentropy', metrics=['accuracy'])
+model.summary()
 
+history = model.fit(x_train, y_train, validation_data=(x_test, y_test), epochs=20, batch_size=32, verbose=1)
 
-sgd = tf.keras.optimizers.SGD(lr=0.01, momentum=0.0, decay=0.0, nesterov=False)
+# Retrieve a list of accuracy results on training and test data
+# sets for each training epoch
+acc = history.history['acc']
+val_acc = history.history['val_acc']
 
-model.compile(optimizer=sgd, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-model.fit(x_train, y_train, epochs=20, batch_size=32)
+# Retrieve a list of list results on training and test data
+# sets for each training epoch
+loss = history.history['loss']
+val_loss = history.history['val_loss']
 
-test_loss, test_acc = model.evaluate(x_test, y_test)
-print(test_loss, test_acc)
+# Get number of epochs
+epochs = range(len(acc))
+
+# Plot training and validation accuracy per epoch
+plt.plot(epochs, acc)
+plt.plot(epochs, val_acc)
+plt.title('Training and validation accuracy')
+
+plt.figure()
+
+# Plot training and validation loss per epoch
+plt.plot(epochs, loss)
+plt.plot(epochs, val_loss)
+plt.title('Training and validation loss')
 
 
 
